@@ -261,15 +261,25 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
+    // Ensure audio context is unlocked
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+
     synth.cancel(); // Stop ongoing speech
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.pitch = state.voicePitch;
     utterance.rate = state.voiceRate;
+    utterance.volume = 1.0; // Max volume
 
     const voices = synth.getVoices();
     if (state.selectedVoiceURI) {
       const foundVoice = voices.find(v => v.voiceURI === state.selectedVoiceURI);
       if (foundVoice) utterance.voice = foundVoice;
+    } else if (voices.length > 0) {
+      // Auto-pick best natural voice
+      const SiriVoice = voices.find(v => v.name.includes('Samantha') || v.name.includes('Google US English') || v.name.includes('Zira') || v.name.includes('Siri') || v.lang.startsWith('en'));
+      if (SiriVoice) utterance.voice = SiriVoice;
     }
 
     utterance.onstart = () => {
@@ -279,13 +289,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     utterance.onend = () => {
       state.isSpeaking = false;
-      setAssistantState('ready', 'Tap mic or press Space to talk');
+      setAssistantState('ready', 'Tap mic, say "Hey Siri", or press Space to talk');
       if (callback) callback();
     };
 
-    utterance.onerror = () => {
+    utterance.onerror = (e) => {
+      console.warn('TTS Speak Error:', e);
       state.isSpeaking = false;
-      setAssistantState('ready', 'Tap mic or press Space to talk');
+      setAssistantState('ready', 'Tap mic, say "Hey Siri", or press Space to talk');
       if (callback) callback();
     };
 
