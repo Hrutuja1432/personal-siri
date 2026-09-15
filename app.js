@@ -402,16 +402,30 @@ document.addEventListener('DOMContentLoaded', () => {
     let reply = '';
     let executedAction = false;
 
-    // 1. Mobile Intent: Voice Call ("call 9876543210" or "call mom")
+    // Contacts Dictionary
+    const defaultContacts = {
+      'queen': '9876543210',
+      'mom': '9123456789',
+      'dad': '9988776655',
+      'home': '02212345678'
+    };
+    const userContacts = JSON.parse(localStorage.getItem('siri_contacts')) || defaultContacts;
+
+    // 1. Mobile Intent: Voice Call ("call 9876543210" or "call queen")
     if (cmd.startsWith('call ')) {
-      const target = commandStr.substring(5).trim();
-      const cleanNumber = target.replace(/[^0-9+]/g, '');
-      reply = `Calling ${target}...`;
+      const target = commandStr.substring(5).trim().toLowerCase();
+      let number = userContacts[target] || target.replace(/[^0-9+]/g, '');
+
+      if (!number && target) {
+        number = target;
+      }
+
+      reply = `Calling ${target.toUpperCase()} at ${number}...`;
       playSiriChime('confirm');
       addChatBubble('assistant', reply);
       speakText(reply);
       setTimeout(() => {
-        window.location.href = `tel:${cleanNumber || target}`;
+        window.location.href = `tel:${number}`;
       }, 1200);
       return;
     }
@@ -429,15 +443,25 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    // 3. Mobile Intent: SMS Message ("sms 9876543210 message meeting tomorrow")
+    // 3. Mobile Intent: SMS Message ("sms queen message meeting tomorrow")
     if (cmd.startsWith('sms ')) {
-      const body = commandStr.substring(4).trim();
-      reply = `Opening SMS composer...`;
+      const parts = commandStr.substring(4).trim();
+      let recipient = '';
+      let msgText = parts;
+
+      if (parts.toLowerCase().includes('message')) {
+        const splitParts = parts.split(/message/i);
+        recipient = splitParts[0].trim().toLowerCase();
+        msgText = splitParts[1].trim();
+      }
+
+      const number = userContacts[recipient] || recipient;
+      reply = `Sending SMS to ${recipient ? recipient.toUpperCase() : ''} (${number}): "${msgText}"...`;
       playSiriChime('confirm');
       addChatBubble('assistant', reply);
       speakText(reply);
       setTimeout(() => {
-        window.location.href = `sms:?body=${encodeURIComponent(body)}`;
+        window.location.href = `sms:${number}?body=${encodeURIComponent(msgText)}`;
       }, 1200);
       return;
     }
