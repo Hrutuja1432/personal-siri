@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Personal Siri - AI Voice Assistant & Mobile Automation</title>
+  <meta name="description" content="Futuristic Personal Siri Voice Assistant with mobile phone handling, weather, tasks, timers, navigation, and speech synthesis.">
+  <meta name="theme-color" content="#0a0b10">
+
+  <!-- Manifest & Favicon -->
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%236366f1'/></svg>">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Main Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-theme="cosmic">
+  <div class="app-background">
+    <div class="bg-glow bg-glow-1"></div>
+    <div class="bg-glow bg-glow-2"></div>
+    <div class="bg-glow bg-glow-3"></div>
+  </div>
+
+  <div class="app-container">
+    <!-- Header Navbar -->
+    <header class="app-header glass-card">
+      <div class="brand-section">
+        <div class="assistant-logo">
+          <div class="logo-orb"></div>
+          <i class="fa-solid fa-sparkles logo-icon"></i>
+        </div>
+        <div class="brand-text">
+          <h1 id="assistant-name-display">Siri</h1>
+          <span class="status-badge" id="speech-status-badge">
+            <span class="status-dot"></span> <span id="status-badge-text">Ready</span>
+          </span>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <button class="icon-btn" id="wake-word-toggle-btn" title="Toggle Hands-Free Wake Word ('Hey Siri')">
+          <i class="fa-solid fa-ear-listen"></i>
+          <span class="btn-tooltip">Wake Word: OFF</span>
+        </button>
+        <button class="icon-btn" id="tts-mute-btn" title="Mute Voice Audio Output">
+          <i class="fa-solid fa-volume-high" id="tts-mute-icon"></i>
+        </button>
+        <button class="icon-btn" id="install-pwa-btn" title="Install as Mobile App" style="display: none;">
+          <i class="fa-solid fa-download"></i>
+        </button>
+        <button class="icon-btn" id="open-settings-btn" title="Settings & Customization">
+          <i class="fa-solid fa-sliders"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Visualizer & Voice Orb Area -->
+    <main class="main-stage">
+      <section class="orb-section">
+        <div class="orb-status-container">
+          <p class="orb-hint" id="orb-status-text">Tap mic or press <kbd>Space</kbd> to talk</p>
+        </div>
+
+        <div class="orb-wrapper" id="orb-trigger-zone">
+          <div class="orb-ripple ripple-1"></div>
+          <div class="orb-ripple ripple-2"></div>
+          <div class="orb-ripple ripple-3"></div>
+          
+          <div class="siri-orb" id="siri-orb-element">
+            <canvas id="orb-canvas" width="260" height="260"></canvas>
+            <div class="orb-core"></div>
+          </div>
+        </div>
+
+        <!-- Voice Action Bar -->
+        <div class="voice-controls">
+          <button class="mic-trigger-btn" id="mic-btn" aria-label="Activate Voice Assistant">
+            <i class="fa-solid fa-microphone" id="mic-icon"></i>
+            <div class="mic-pulse-ring"></div>
+          </button>
+          
+          <div class="quick-input-bar glass-card">
+            <i class="fa-solid fa-keyboard input-icon"></i>
+            <input type="text" id="text-command-input" placeholder="Type a command (e.g. 'Call 9876543210', 'Weather in Mumbai')..." autocomplete="off">
+            <button id="send-command-btn" title="Send Command">
+              <i class="fa-solid fa-paper-plane"></i>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Live Voice Conversation Transcript Overlay -->
+      <section class="transcript-section glass-card" id="transcript-box">
+        <div class="transcript-header">
+          <span><i class="fa-solid fa-comments"></i> Live Conversation</span>
+          <button class="text-btn-sm" id="clear-transcript-btn"><i class="fa-solid fa-trash-can"></i> Clear</button>
+        </div>
+        <div class="transcript-messages" id="transcript-messages-container">
+          <div class="chat-bubble assistant-bubble">
+            <div class="bubble-avatar"><i class="fa-solid fa-sparkles"></i></div>
+            <div class="bubble-content">
+              <p>Namaste! Main aapka personal Siri Voice Assistant hu. Aap mujhse call, WhatsApp, weather, timer, reminders ya query ke baare me pooch sakte hain!</p>
+              <span class="bubble-time">Just now</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Quick Action Mobile Shortcuts Tiles -->
+      <section class="quick-skills-section">
+        <h3 class="section-title"><i class="fa-solid fa-bolt"></i> Mobile & Voice Shortcuts</h3>
+        <div class="skills-grid">
+          <button class="skill-tile" data-command="Call emergency number 112">
+            <div class="tile-icon icon-call"><i class="fa-solid fa-phone-flip"></i></div>
+            <div class="tile-info">
+              <span class="tile-title">Voice Call</span>
+              <span class="tile-sub">"Call [Number / Contact]"</span>
+            </div>
+          </button>
+
+          <button class="skill-tile" data-command="WhatsApp Rahul message I am reaching soon">
+            <div class="tile-icon icon-whatsapp"><i class="fa-brands fa-whatsapp"></i></div>
+            <div class="tile-info">
+              <span class="tile-title">WhatsApp Msg</span>
+              <span class="tile-sub">"WhatsApp [Name] [Message]"</span>
+            </div>
+          </button>
+
+          <button class="skill-tile" data-command="Navigate to Mumbai">
+            <div class="tile-icon icon-maps"><i class="fa-solid fa-location-dot"></i></div>
+            <div class="tile-info">
+              <span class="tile-title">GPS Navigation</span>
+              <span class="tile-sub">"Take me to [Location]"</span>
+            </div>
+          </button>
+
+          <button class="skill-tile" data-command="What is the weather today?">
+            <div class="tile-icon icon-weather"><i class="fa-solid fa-cloud-sun-rain"></i></div>
+            <div class="tile-info">
+              <span class="tile-title">Live Weather</span>
+              <span class="tile-sub">"Weather in [City]"</span>
+            </div>
+          </button>
+
+          <button class="skill-tile" data-command="Set timer for 5 minutes">
+            <div class="tile-icon icon-timer"><i class="fa-solid fa-stopwatch"></i></div>
+            <div class="tile-info">
+              <span class="tile-title">Voice Timer</span>
+              <span class="tile-sub">"Set timer for [X] min"</span>
+            </div>
+          </button>
+
+          <button class="skill-tile" data-command="Add task Buy milk and fruits">
+            <div class="tile-icon icon-task"><i class="fa-solid fa-list-check"></i></div>
+            <div class="tile-info">
+              <span class="tile-title">Reminders</span>
+              <span class="tile-sub">"Add task [Description]"</span>
+            </div>
+          </button>
+
+          <button class="skill-tile" data-command="Tell me a fun joke">
+            <div class="tile-icon icon-joke"><i class="fa-solid fa-face-laugh-beam"></i></div>
+            <div class="tile-info">
+              <span class="tile-title">Jokes & Fun</span>
+              <span class="tile-sub">"Tell me a joke"</span>
+            </div>
+          </button>
+
+          <button class="skill-tile" data-command="Open camera">
+            <div class="tile-icon icon-camera"><i class="fa-solid fa-camera"></i></div>
+            <div class="tile-info">
+              <span class="tile-title">Camera Feed</span>
+              <span class="tile-sub">"Open camera"</span>
+            </div>
+          </button>
+        </div>
+      </section>
+
+      <!-- Glassmorphic Widgets Dashboard -->
+      <section class="dashboard-grid">
+        <!-- Widget 1: Clock & Calendar -->
+        <div class="widget-card glass-card" id="widget-clock">
+          <div class="widget-header">
+            <span class="widget-title"><i class="fa-solid fa-clock"></i> Date & Time</span>
+            <span class="widget-badge" id="live-location-badge">GPS Locating...</span>
+          </div>
+          <div class="clock-display">
+            <div class="time-large" id="digital-clock">00:00:00</div>
+            <div class="date-sub" id="digital-date">Monday, 14 September 2026</div>
+          </div>
+        </div>
+
+        <!-- Widget 2: Weather Info -->
+        <div class="widget-card glass-card" id="widget-weather">
+          <div class="widget-header">
+            <span class="widget-title"><i class="fa-solid fa-cloud-sun"></i> Weather Forecast</span>
+            <button class="text-btn-sm" id="refresh-weather-btn"><i class="fa-solid fa-rotate-right"></i></button>
+          </div>
+          <div class="weather-body">
+            <div class="weather-main">
+              <div class="weather-icon-box" id="weather-icon-element">
+                <i class="fa-solid fa-sun weather-icon"></i>
+              </div>
+              <div class="weather-temp-group">
+                <span class="weather-temp" id="weather-temp-text">28°C</span>
+                <span class="weather-desc" id="weather-desc-text">Clear Sky</span>
+              </div>
+            </div>
+            <div class="weather-details">
+              <div class="weather-detail-item">
+                <i class="fa-solid fa-location-arrow"></i>
+                <span id="weather-city-text">Mumbai, IN</span>
+              </div>
+              <div class="weather-detail-item">
+                <i class="fa-solid fa-droplet"></i>
+                <span id="weather-humidity-text">Humidity: 65%</span>
+              </div>
+              <div class="weather-detail-item">
+                <i class="fa-solid fa-wind"></i>
+                <span id="weather-wind-text">Wind: 12 km/h</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Widget 3: Tasks & Reminders -->
+        <div class="widget-card glass-card" id="widget-tasks">
+          <div class="widget-header">
+            <span class="widget-title"><i class="fa-solid fa-square-check"></i> Tasks & Reminders</span>
+            <span class="badge-count" id="task-count-badge">0</span>
+          </div>
+          <div class="widget-input-row">
+            <input type="text" id="new-task-input" placeholder="Add a new task...">
+            <button class="btn-primary-sm" id="add-task-btn"><i class="fa-solid fa-plus"></i></button>
+          </div>
+          <ul class="task-list" id="task-list-container">
+            <li class="empty-list-notice">No tasks yet. Say "Add task..." to create one!</li>
+          </ul>
+        </div>
+
+        <!-- Widget 4: Voice Timer & Stopwatch -->
+        <div class="widget-card glass-card" id="widget-timer">
+          <div class="widget-header">
+            <span class="widget-title"><i class="fa-solid fa-hourglass-half"></i> Voice Timer</span>
+            <span class="status-tag" id="timer-status-tag">Idle</span>
+          </div>
+          <div class="timer-display-box">
+            <div class="timer-ring-container">
+              <svg class="timer-svg" viewBox="0 0 100 100">
+                <circle class="timer-bg-circle" cx="50" cy="50" r="45"></circle>
+                <circle class="timer-progress-circle" id="timer-progress-bar" cx="50" cy="50" r="45"></circle>
+              </svg>
+              <div class="timer-time-text" id="timer-countdown-display">00:00</div>
+            </div>
+            <div class="timer-action-btns">
+              <button class="btn-secondary-sm" id="timer-start-1m">+1 Min</button>
+              <button class="btn-secondary-sm" id="timer-start-5m">+5 Min</button>
+              <button class="btn-danger-sm" id="timer-cancel-btn"><i class="fa-solid fa-stop"></i> Reset</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Widget 5: Voice Notes -->
+        <div class="widget-card glass-card" id="widget-notes">
+          <div class="widget-header">
+            <span class="widget-title"><i class="fa-solid fa-note-sticky"></i> Voice Notes</span>
+            <button class="text-btn-sm" id="add-note-btn"><i class="fa-solid fa-plus"></i> New Note</button>
+          </div>
+          <div class="notes-body" id="notes-container">
+            <div class="empty-list-notice">No voice notes saved. Say "Take note [text]" to record one.</div>
+          </div>
+        </div>
+
+        <!-- Widget 6: Assistant Persona & Quick Stats -->
+        <div class="widget-card glass-card" id="widget-stats">
+          <div class="widget-header">
+            <span class="widget-title"><i class="fa-solid fa-sliders"></i> Engine Status</span>
+          </div>
+          <div class="stats-list">
+            <div class="stat-row">
+              <span class="stat-label"><i class="fa-solid fa-microphone-lines"></i> Speech Engine:</span>
+              <span class="stat-val val-green" id="engine-stt-status">WebSpeech API (Active)</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label"><i class="fa-solid fa-volume-high"></i> Voice Synthesizer:</span>
+              <span class="stat-val val-blue" id="engine-tts-status">System TTS (Active)</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label"><i class="fa-solid fa-brain"></i> AI Brain:</span>
+              <span class="stat-val" id="engine-ai-status">Built-in Hybrid Engine</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label"><i class="fa-solid fa-mobile-screen"></i> Mobile PWA Mode:</span>
+              <span class="stat-val" id="engine-pwa-status">Ready for Install</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <p>Personal Siri AI Voice Assistant &bull; Powered by Web Speech & Web Audio APIs</p>
+    </footer>
+  </div>
+
+  <!-- Camera Preview Modal -->
+  <div class="modal-overlay" id="camera-modal">
+    <div class="modal-card glass-card">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-camera"></i> Live Device Camera</h3>
+        <button class="close-modal-btn" id="close-camera-modal"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <video id="camera-video-stream" autoplay playsinline muted></video>
+        <canvas id="camera-snapshot-canvas" style="display:none;"></canvas>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-primary" id="take-photo-btn"><i class="fa-solid fa-aperture"></i> Snap Photo</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div class="modal-overlay" id="settings-modal">
+    <div class="modal-card glass-card modal-lg">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-gears"></i> Assistant & Mobile Settings</h3>
+        <button class="close-modal-btn" id="close-settings-modal"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="modal-body settings-body">
+        <!-- Settings Group 1: Assistant Identity -->
+        <div class="setting-group">
+          <h4>Assistant Persona</h4>
+          <div class="form-row">
+            <label for="assistant-name-input">Assistant Name:</label>
+            <input type="text" id="assistant-name-input" value="Siri">
+          </div>
+          <div class="form-row">
+            <label for="wake-word-input">Wake Word Trigger:</label>
+            <input type="text" id="wake-word-input" value="Hey Siri">
+          </div>
+        </div>
+
+        <!-- Settings Group 2: Voice & Speech -->
+        <div class="setting-group">
+          <h4>Speech Synthesis Settings</h4>
+          <div class="form-row">
+            <label for="tts-voice-select">Voice Model:</label>
+            <select id="tts-voice-select">
+              <option value="">Default System Voice</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label for="tts-pitch-range">Voice Pitch (<span id="pitch-val-display">1.0</span>):</label>
+            <input type="range" id="tts-pitch-range" min="0.5" max="1.5" step="0.1" value="1.0">
+          </div>
+          <div class="form-row">
+            <label for="tts-rate-range">Voice Speed (<span id="rate-val-display">1.0</span>):</label>
+            <input type="range" id="tts-rate-range" min="0.5" max="1.8" step="0.1" value="1.0">
+          </div>
+        </div>
+
+        <!-- Settings Group 3: Optional AI Key -->
+        <div class="setting-group">
+          <h4>Google Gemini API (Optional)</h4>
+          <p class="setting-help">Enter your Gemini API key for advanced conversational intelligence. Leave empty to use built-in offline voice intelligence.</p>
+          <div class="form-row">
+            <label for="gemini-key-input">Gemini API Key:</label>
+            <input type="password" id="gemini-key-input" placeholder="AIzaSy...">
+          </div>
+        </div>
+
+        <!-- Settings Group 4: Theme & Appearance -->
+        <div class="setting-group">
+          <h4>Appearance & Theme</h4>
+          <div class="theme-options">
+            <button class="theme-chip active" data-theme-id="cosmic">Cosmic Purple</button>
+            <button class="theme-chip" data-theme-id="cyberpunk">Cyber Neon</button>
+            <button class="theme-chip" data-theme-id="emerald">Emerald Glass</button>
+            <button class="theme-chip" data-theme-id="oled">OLED Midnight</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-danger" id="reset-app-data-btn"><i class="fa-solid fa-trash"></i> Reset Data</button>
+        <button class="btn-primary" id="save-settings-btn"><i class="fa-solid fa-check"></i> Save Preferences</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Audio Chime Elements (Generated via Web Audio API, fallback audio) -->
+  <script src="app.js"></script>
+</body>
+</html>
