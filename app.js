@@ -328,7 +328,12 @@ document.addEventListener('DOMContentLoaded', () => {
     recognition.onerror = (event) => {
       console.warn('Speech Recognition Error:', event.error);
       state.isListening = false;
-      setAssistantState('ready', 'Tap mic or press Space to talk');
+      if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+        setAssistantState('ready', '⚠️ Mic Blocked! Allow microphone permission in browser or open via HTTPS.');
+        alert('Microphone Access Blocked! Please click the lock/mic icon in your browser address bar and select "Allow Microphone".');
+      } else {
+        setAssistantState('ready', 'Tap mic or press Space to talk');
+      }
     };
 
     recognition.onend = () => {
