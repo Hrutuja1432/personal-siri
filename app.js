@@ -402,14 +402,77 @@ document.addEventListener('DOMContentLoaded', () => {
     let reply = '';
     let executedAction = false;
 
-    // Contacts Dictionary
-    const defaultContacts = {
-      'queen': '9876543210',
-      'mom': '9123456789',
-      'dad': '9988776655',
-      'home': '02212345678'
-    };
-    const userContacts = JSON.parse(localStorage.getItem('siri_contacts')) || defaultContacts;
+    // 0. Universal App & Web Launcher ("open youtube", "open instagram", "open whatsapp", "open google", etc.)
+    if (cmd.startsWith('open ') || cmd.startsWith('launch ') || cmd.includes('open ') || cmd === 'youtube' || cmd === 'instagram' || cmd === 'facebook' || cmd === 'whatsapp') {
+      const appTarget = cmd.replace(/open/i, '').replace(/launch/i, '').replace(/karo/i, '').replace(/app/i, '').trim();
+
+      if (appTarget.includes('youtube')) {
+        let searchQuery = appTarget.replace(/youtube/i, '').replace(/on/i, '').replace(/play/i, '').trim();
+        let targetUrl = searchQuery ? `https://www.youtube.com/results?search_query=${encodeURIComponent(searchQuery)}` : 'https://www.youtube.com';
+        reply = searchQuery ? `Opening YouTube for "${searchQuery}"...` : `Opening YouTube...`;
+        playSiriChime('confirm');
+        addChatBubble('assistant', reply);
+        speakText(reply);
+        setTimeout(() => { window.location.href = targetUrl; }, 1000);
+        return;
+      }
+      if (appTarget.includes('whatsapp')) {
+        reply = `Opening WhatsApp...`;
+        playSiriChime('confirm');
+        addChatBubble('assistant', reply);
+        speakText(reply);
+        setTimeout(() => { window.location.href = 'https://wa.me/'; }, 1000);
+        return;
+      }
+      if (appTarget.includes('instagram')) {
+        reply = `Opening Instagram...`;
+        playSiriChime('confirm');
+        addChatBubble('assistant', reply);
+        speakText(reply);
+        setTimeout(() => { window.location.href = 'https://www.instagram.com'; }, 1000);
+        return;
+      }
+      if (appTarget.includes('facebook')) {
+        reply = `Opening Facebook...`;
+        playSiriChime('confirm');
+        addChatBubble('assistant', reply);
+        speakText(reply);
+        setTimeout(() => { window.location.href = 'https://www.facebook.com'; }, 1000);
+        return;
+      }
+      if (appTarget.includes('google') || appTarget.includes('chrome')) {
+        reply = `Opening Google...`;
+        playSiriChime('confirm');
+        addChatBubble('assistant', reply);
+        speakText(reply);
+        setTimeout(() => { window.location.href = 'https://www.google.com'; }, 1000);
+        return;
+      }
+      if (appTarget.includes('spotify') || appTarget.includes('music')) {
+        reply = `Opening Spotify Music...`;
+        playSiriChime('confirm');
+        addChatBubble('assistant', reply);
+        speakText(reply);
+        setTimeout(() => { window.location.href = 'https://open.spotify.com'; }, 1000);
+        return;
+      }
+      if (appTarget.includes('map') || appTarget.includes('location')) {
+        reply = `Opening Google Maps...`;
+        playSiriChime('confirm');
+        addChatBubble('assistant', reply);
+        speakText(reply);
+        setTimeout(() => { window.location.href = 'https://maps.google.com'; }, 1000);
+        return;
+      }
+      if (appTarget.includes('camera')) {
+        reply = `Opening Camera...`;
+        playSiriChime('confirm');
+        addChatBubble('assistant', reply);
+        speakText(reply);
+        openCameraModal();
+        return;
+      }
+    }
 
     // 1. Mobile Intent: Voice Call ("call 9876543210" or "call queen")
     if (cmd.startsWith('call ')) {
