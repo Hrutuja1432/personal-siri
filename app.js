@@ -556,7 +556,7 @@ document.addEventListener('DOMContentLoaded', () => {
       executedAction = true;
     }
 
-    // 11. Google & YouTube Search ("search google for...", "play music...")
+    // 11. Google & YouTube Search ("open youtube", "search google for...", "play song...")
     else if (cmd.includes('search google for') || cmd.includes('google search')) {
       const q = commandStr.replace(/search google for/i, '').replace(/google search/i, '').trim();
       reply = `Searching Google for "${q}"...`;
@@ -564,17 +564,23 @@ document.addEventListener('DOMContentLoaded', () => {
       addChatBubble('assistant', reply);
       speakText(reply);
       setTimeout(() => {
-        window.open(`https://www.google.com/search?q=${encodeURIComponent(q)}`, '_blank');
+        window.location.href = `https://www.google.com/search?q=${encodeURIComponent(q)}`;
       }, 1000);
       return;
-    } else if (cmd.includes('play') && (cmd.includes('youtube') || cmd.includes('music') || cmd.includes('song'))) {
-      const q = commandStr.replace(/play/i, '').replace(/on youtube/i, '').replace(/music/i, '').replace(/song/i, '').trim();
-      reply = `Playing ${q} on YouTube...`;
+    } else if (cmd.includes('youtube') || cmd.includes('play song') || cmd.includes('play music')) {
+      let q = commandStr.replace(/open/i, '').replace(/youtube/i, '').replace(/play/i, '').replace(/on/i, '').replace(/song/i, '').replace(/music/i, '').replace(/karo/i, '').trim();
+      let targetUrl = 'https://www.youtube.com';
+      if (q) {
+        targetUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(q)}`;
+        reply = `Opening YouTube for "${q}"...`;
+      } else {
+        reply = `Opening YouTube...`;
+      }
       playSiriChime('confirm');
       addChatBubble('assistant', reply);
       speakText(reply);
       setTimeout(() => {
-        window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(q)}`, '_blank');
+        window.location.href = targetUrl;
       }, 1000);
       return;
     }
